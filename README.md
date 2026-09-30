@@ -26,8 +26,12 @@ You pick a fighter and beat the other two, then your own shadow. Rounds are best
 
 Crouching ducks under energy balls. The menu has sound, full screen and EN/PT.
 
+The first tap or key press switches to full screen and locks landscape (browsers do
+not allow it before a tap). iPhones have no full-screen mode for web pages: there, use
+Share → Add to Home Screen and open the game from the new icon.
+
 URL options: `?lang=en|pt`, `?seed=<number>` (repeatable CPU behaviour), `?touch=1`
-(show the on-screen controls on a computer).
+(show the on-screen controls on a computer), `?fullscreen=0` (stay windowed).
 
 ## Code
 

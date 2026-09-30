@@ -87,6 +87,21 @@ function setPaused(p) {
   }
 }
 
+// Full screen + landscape lock. False when the browser has no API (iPhone) or refuses.
+async function enterFullscreen() {
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return false;
+  try {
+    await el.requestFullscreen({ navigationUI: "hide" });
+  } catch {
+    return false;
+  }
+  try {
+    await screen.orientation?.lock?.("landscape");
+  } catch { /* desktop browsers cannot lock */ }
+  return true;
+}
+
 function bindUi() {
   const wake = () => initAudio();
   // iOS only unlocks audio from touchend/click, other browsers from pointerdown/keydown.
@@ -106,15 +121,21 @@ function bindUi() {
     applyLang();
   });
   $("fullBtn").addEventListener("click", async () => {
-    try {
-      if (document.fullscreenElement) await document.exitFullscreen();
-      else {
-        await document.documentElement.requestFullscreen();
-        await screen.orientation?.lock?.("landscape");
-      }
-    } catch { /* not supported (iOS) or refused */ }
+    if (document.fullscreenElement) await document.exitFullscreen().catch(() => {});
+    else await enterFullscreen();
     setPaused(false);
   });
+  // Browsers only allow full screen from a tap or key press, so the first one does it.
+  if (params.get("fullscreen") !== "0") {
+    let tries = 0;
+    const auto = async (e) => {
+      if (e.code === "Escape" || e.target.closest?.("#top, #menu")) return;
+      if (document.fullscreenElement || ++tries > 3 || (await enterFullscreen())) {
+        for (const type of ["pointerup", "keydown"]) window.removeEventListener(type, auto);
+      }
+    };
+    for (const type of ["pointerup", "keydown"]) window.addEventListener(type, auto);
+  }
   $("quitBtn").addEventListener("click", () => {
     setPaused(false);
     stopMusic();

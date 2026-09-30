@@ -190,6 +190,7 @@ def atlas():
         head = Image.open(SRC / "frames" / c / "idle_0.png").crop((x, y, x + w, y + h)).resize((96, 96), Image.LANCZOS)
         icon.alpha_composite(head, [(0, 0), (96, 0), (48, 96)][i])
     icon.save(ROOT / "assets" / "icon.png", optimize=True)
+    icon.resize((512, 512), Image.LANCZOS).save(ROOT / "assets" / "icon-512.png", optimize=True)
 
 
 if __name__ == "__main__":
