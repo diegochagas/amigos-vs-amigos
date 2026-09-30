@@ -267,7 +267,7 @@ function draw() {
     text("AMIGOS", 120, 62, 96, { fill: "gold", stroke: "#10104a", lineWidth: 14 });
     ctx.restore();
     text(t("subtitle"), VIEW_W / 2, 238, 26, { fill: "#8fe9ff" });
-    if (blink()) text(t(document.body.classList.contains("touch") ? "startTouch" : "start"), VIEW_W / 2, VIEW_H - 34, 30, { fill: "#fff" });
+    if (blink()) text(t(document.body.classList.contains("touch") ? "startTouch" : "start"), VIEW_W / 2, VIEW_H - 76, 30, { fill: "#fff" });
   } else if (s === "select") {
     backdrop(225);
     const id = ROSTER[game.cursor];
@@ -283,7 +283,7 @@ function draw() {
     ctx.strokeStyle = blink() ? "#ffe600" : "#ff3d3d";
     ctx.strokeRect(cx - 6, SELECT.y - 6, SELECT.size + 12, SELECT.size + 12);
     text("1P", cx + 8, SELECT.y - 14, 26, { fill: "#ff3d3d", stroke: "#fff", lineWidth: 5, align: "left" });
-    text(t("confirm"), VIEW_W / 2, VIEW_H - 22, 22, { fill: "#8fe9ff" });
+    text(t("confirm"), VIEW_W / 2, VIEW_H - 64, 22, { fill: "#8fe9ff" });
   } else if (s === "vs") {
     backdrop(isFinal() ? 285 : 350);
     const foe = game.ladder[game.stage], k = Math.min(1, game.t / 18);
@@ -330,7 +330,7 @@ function draw() {
     sprite(game.player, danceFrame(), VIEW_W / 2, FLOOR_Y + 50, 1, 1.25);
     banner(t("congrats"), game.t, 78, 80);
     text(`${FIGHTERS[game.player].name} ${t("champion")}`, VIEW_W / 2, 150, 40, { fill: "#fff", stroke: FIGHTERS[game.player].color, lineWidth: 9 });
-    if (game.t > 150 && blink()) text(t("thanks"), VIEW_W / 2, VIEW_H - 30, 28, { fill: "#8fe9ff" });
+    if (game.t > 150 && blink()) text(t("thanks"), VIEW_W / 2, VIEW_H - 70, 28, { fill: "#8fe9ff" });
   }
 }
 
