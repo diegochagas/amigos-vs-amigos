@@ -1,0 +1,14 @@
+{
+  "name": "amigos-vs-amigos",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "scripts/check",
+    "start": "npx serve -l 4173 .",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "serve": "^14.2.4"
+  }
+}

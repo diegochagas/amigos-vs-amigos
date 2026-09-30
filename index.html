@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Amigos vs. Amigos</title>
+<link rel="icon" href="assets/icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="screen">
+  <canvas id="game" width="960" height="540" aria-label="Amigos vs. Amigos"></canvas>
+</div>
+
+<div id="pad" class="ctl" aria-hidden="true">
+  <i class="arm h"></i><i class="arm v"></i>
+  <b class="up"></b><b class="down"></b><b class="left"></b><b class="right"></b>
+</div>
+<div id="buttons" class="ctl" aria-hidden="true">
+  <span data-btn="b">B</span><span data-btn="a">A</span>
+</div>
+
+<div id="top">
+  <button id="langBtn" type="button">PT</button>
+  <button id="menuBtn" type="button" aria-label="Menu"><i></i><i></i><i></i></button>
+</div>
+
+<div id="menu" hidden>
+  <h2 id="menuTitle">PAUSED</h2>
+  <button id="resumeBtn" type="button">Resume</button>
+  <button id="soundBtn" type="button">Sound</button>
+  <button id="fullBtn" type="button">Full screen</button>
+  <button id="quitBtn" type="button">Quit</button>
+  <p id="help"></p>
+  <p id="helpKeys"></p>
+</div>
+<p id="status" class="sr" aria-live="polite">loading</p>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

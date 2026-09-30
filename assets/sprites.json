@@ -1,0 +1,99 @@
+{
+ "cell": [
+  560,
+  360
+ ],
+ "anchor": [
+  280,
+  352
+ ],
+ "cols": 5,
+ "fighters": {
+  "jose": [
+   "idle_0",
+   "idle_1",
+   "idle_2",
+   "idle_3",
+   "walk_0",
+   "walk_1",
+   "jump",
+   "crouch",
+   "punch",
+   "kick",
+   "special",
+   "block",
+   "hit",
+   "ko",
+   "dance_0",
+   "dance_1",
+   "dance_2",
+   "dance_3",
+   "dance_4",
+   "dance_5"
+  ],
+  "rachel": [
+   "idle_0",
+   "idle_1",
+   "idle_2",
+   "idle_3",
+   "walk_0",
+   "walk_1",
+   "jump",
+   "crouch",
+   "punch",
+   "kick",
+   "special",
+   "block",
+   "hit",
+   "ko",
+   "dance_0",
+   "dance_1",
+   "dance_2",
+   "dance_3",
+   "dance_4",
+   "dance_5"
+  ],
+  "diego": [
+   "idle_0",
+   "idle_1",
+   "idle_2",
+   "idle_3",
+   "walk_0",
+   "walk_1",
+   "jump",
+   "crouch",
+   "punch",
+   "kick",
+   "special",
+   "block",
+   "hit",
+   "ko",
+   "dance_0",
+   "dance_1",
+   "dance_2",
+   "dance_3",
+   "dance_4",
+   "dance_5"
+  ]
+ },
+ "portraits": {
+  "jose": [
+   248,
+   80,
+   89,
+   89
+  ],
+  "rachel": [
+   238,
+   80,
+   89,
+   89
+  ],
+  "diego": [
+   241,
+   80,
+   89,
+   89
+  ]
+ }
+}

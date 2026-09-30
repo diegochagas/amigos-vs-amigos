@@ -1,0 +1,73 @@
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%; background: #000; color: #fff; overflow: hidden;
+  font-family: "Arial Black", Arial, sans-serif;
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  overscroll-behavior: none;
+}
+#screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+#game {
+  width: min(100vw, calc(100vh * 16 / 9)); max-height: 100vh;      /* browsers without dvh */
+  width: min(100vw, calc(100dvh * 16 / 9)); aspect-ratio: 16 / 9; max-height: 100dvh;
+  display: block; background: #05052a;
+}
+@media (orientation: portrait) { #screen { align-items: flex-start; padding-top: max(44px, env(safe-area-inset-top)); } }
+
+/* On-screen controls sit on top of the game, like an emulator overlay. */
+.ctl { position: fixed; display: none; opacity: .62; z-index: 2; touch-action: none; }
+body.touch .ctl { display: block; }
+#pad {
+  --s: clamp(120px, 40vmin, 190px);
+  width: var(--s); height: var(--s);
+  left: max(14px, env(safe-area-inset-left)); bottom: max(9vh, env(safe-area-inset-bottom));
+}
+#pad .arm { position: absolute; background: #5a5a5e; border-radius: 9%; }
+#pad .arm.h { left: 0; right: 0; top: 35.5%; height: 29%; }
+#pad .arm.v { top: 0; bottom: 0; left: 35.5%; width: 29%; }
+#pad b { position: absolute; width: 0; height: 0; border: calc(var(--s) * .055) solid transparent; }
+#pad b.up { left: 50%; top: 7%; transform: translateX(-50%); border-top: 0; border-bottom-color: #222; }
+#pad b.down { left: 50%; bottom: 7%; transform: translateX(-50%); border-bottom: 0; border-top-color: #222; }
+#pad b.left { top: 50%; left: 7%; transform: translateY(-50%); border-left: 0; border-right-color: #222; }
+#pad b.right { top: 50%; right: 7%; transform: translateY(-50%); border-right: 0; border-left-color: #222; }
+#pad.up b.up { border-bottom-color: #fff; }
+#pad.down b.down { border-top-color: #fff; }
+#pad.left b.left { border-right-color: #fff; }
+#pad.right b.right { border-left-color: #fff; }
+#buttons {
+  --s: clamp(62px, 19vmin, 92px);
+  right: max(14px, env(safe-area-inset-right)); bottom: max(12vh, env(safe-area-inset-bottom));
+  display: none; gap: calc(var(--s) * .34); padding: calc(var(--s) * .3);
+}
+body.touch #buttons { display: flex; }
+#buttons span {
+  width: var(--s); height: var(--s); border-radius: 50%; background: #2c2c30; border: 2px solid #e8e8e8;
+  color: #ddd; font-size: calc(var(--s) * .5); display: grid; place-items: center; pointer-events: none;
+}
+#buttons span.on { background: #e8e8e8; color: #222; }
+@media (orientation: portrait) {
+  #pad { bottom: max(14vh, env(safe-area-inset-bottom)); }
+  #buttons { bottom: max(16vh, env(safe-area-inset-bottom)); }
+}
+
+/* Language + menu sit bottom-centre, where an emulator shows Select/Start: nothing of the HUD is there. */
+#top {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: max(6px, env(safe-area-inset-bottom));
+  display: flex; gap: 10px; z-index: 3; opacity: .7;
+}
+#top button {
+  height: 34px; min-width: 52px; padding: 0 10px; border: 1px solid rgba(255, 255, 255, .45); border-radius: 8px;
+  background: rgba(40, 40, 46, .75); color: #ddd; font: inherit; font-size: 14px; cursor: pointer;
+}
+#menuBtn { display: grid; align-content: center; justify-items: center; gap: 4px; }
+#menuBtn i { display: block; width: 22px; height: 3px; border-radius: 2px; background: #ddd; }
+
+#menu {
+  position: fixed; inset: 0; margin: auto; width: min(88vw, 360px); height: fit-content; max-height: 94dvh; overflow: auto;
+  padding: 16px 18px; background: rgba(10, 10, 60, .94); border: 3px solid #1c6cff; border-radius: 12px; z-index: 4;
+  display: grid; gap: 9px; text-align: center; touch-action: manipulation;
+}
+#menu[hidden] { display: none; }
+#menu h2 { margin: 0 0 4px; font-style: italic; color: #ffd21e; }
+#menu button { padding: 11px; border: 2px solid #fff; border-radius: 8px; background: #1c2a8c; color: #fff; font: inherit; font-size: 16px; cursor: pointer; }
+#menu p { margin: 2px 0 0; font: 13px/1.35 Arial, sans-serif; color: #cfe6ff; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

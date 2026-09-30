@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# scripts/check for no-build browser games: logic tests use node's built-in runner.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+node --test "tests/*.test.mjs"
