@@ -74,6 +74,28 @@
    "dance_3",
    "dance_4",
    "dance_5"
+  ],
+  "erick": [
+   "idle_0",
+   "idle_1",
+   "idle_2",
+   "idle_3",
+   "walk_0",
+   "walk_1",
+   "jump",
+   "crouch",
+   "punch",
+   "kick",
+   "special",
+   "block",
+   "hit",
+   "ko",
+   "dance_0",
+   "dance_1",
+   "dance_2",
+   "dance_3",
+   "dance_4",
+   "dance_5"
   ]
  },
  "portraits": {
@@ -94,6 +116,13 @@
    80,
    89,
    89
+  ],
+  "erick": [
+   235,
+   60,
+   96,
+   96
   ]
- }
+ },
+ "version": "1d5c668566"
 }

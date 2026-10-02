@@ -79,3 +79,10 @@ test("a key tapped and released between two frames is still seen once", async ()
   assert.equal(input.poll().down, false);
   delete globalThis.window;
 });
+
+test("fighter heights: Rachel a little smaller than Diego, José and Erick taller and equal", () => {
+  const h = (id) => FIGHTERS[id].height;
+  assert.ok(h("rachel") < h("diego") && h("rachel") > 0.8);
+  assert.ok(h("jose") > h("diego"));
+  assert.equal(h("erick"), h("jose"));
+});

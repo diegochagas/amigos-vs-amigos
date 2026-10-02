@@ -67,6 +67,7 @@ export function createRenderer(canvas, assets) {
     if (i < 0) i = 0;
     ctx.save();
     ctx.translate(Math.round(x), Math.round(y));
+    scale *= FIGHTERS[id].height;
     ctx.scale(facing * scale, scale);
     if (o.alpha !== undefined) ctx.globalAlpha = o.alpha;
     const src = [o.shadow ? shadowSheet(id) : sheets[id], (i % meta.cols) * CW, Math.floor(i / meta.cols) * CH, CW, CH, -AX, -AY, CW, CH];
@@ -285,7 +286,7 @@ export function createRenderer(canvas, assets) {
 
   function banner(str, k, size = 92, y = VIEW_H * 0.42, o = {}) {
     // k: frames since it appeared; zooms in then settles.
-    const s = k < 10 ? 2.6 - 1.6 * (k / 10) : 1;
+    const s = k < 10 ? 1.7 - 0.7 * (k / 10) : 1;
     ctx.save();
     ctx.translate(VIEW_W / 2, y);
     ctx.scale(s, s);

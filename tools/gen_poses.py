@@ -37,17 +37,18 @@ PROMPTS = {
     "ko": "knocked out, lying flat on the back on the ground, body horizontal, head on the left and feet on the right, arms limp, eyes closed.",
 }
 
-who = [sys.argv[1]] if len(sys.argv) > 1 else ["jose", "rachel", "diego"]
-which = [sys.argv[2]] if len(sys.argv) > 2 else list(PROMPTS)
-seed = int(sys.argv[3]) if len(sys.argv) > 3 else 1
-if not comfy_client.available("klein"):
-    sys.exit(1)
-for c in who:
-    base = cv2.imread(str(POSES / f"{c}_base.png"))
-    for p in which:
-        out = POSES / f"{c}_{p}.png"
-        if out.exists() and len(sys.argv) <= 2:
-            continue
-        t = time.time()
-        cv2.imwrite(str(out), comfy_client.edit(base, HEAD + PROMPTS[p] + TAIL, "klein", seed))
-        print(f"{out.name} ({time.time() - t:.0f}s)", flush=True)
+if __name__ == "__main__":
+    who = [sys.argv[1]] if len(sys.argv) > 1 else sorted(p.name[:-9] for p in POSES.glob("*_base.png"))
+    which = [sys.argv[2]] if len(sys.argv) > 2 else list(PROMPTS)
+    seed = int(sys.argv[3]) if len(sys.argv) > 3 else 1
+    if not comfy_client.available("klein"):
+        sys.exit(1)
+    for c in who:
+        base = cv2.imread(str(POSES / f"{c}_base.png"))
+        for p in which:
+            out = POSES / f"{c}_{p}.png"
+            if out.exists() and len(sys.argv) <= 2:
+                continue
+            t = time.time()
+            cv2.imwrite(str(out), comfy_client.edit(base, HEAD + PROMPTS[p] + TAIL, "klein", seed))
+            print(f"{out.name} ({time.time() - t:.0f}s)", flush=True)

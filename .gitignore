@@ -4,3 +4,4 @@ test-results/
 playwright-report/
 # Raw AI sheets and generated poses (large); the cut frames live in assets/.
 art-src/
+__pycache__/

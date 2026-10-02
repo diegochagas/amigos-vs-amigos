@@ -34,8 +34,9 @@ async function boot() {
   setLang(pickLang(params.get("lang"), store.get("ava.lang"), navigator.language));
   setMuted(store.get("ava.muted") === "1");
   applyLang();
-  const meta = await (await fetch("assets/sprites.json")).json();
-  const [stage, ...imgs] = await Promise.all([loadImage("assets/stage.jpg"), ...ROSTER.map((id) => loadImage(`assets/${id}.png`))]);
+  const meta = await (await fetch("assets/sprites.json", { cache: "no-cache" })).json();
+  // ?v= changes whenever an atlas does, so a browser never keeps showing an old fighter.
+  const [stage, ...imgs] = await Promise.all([loadImage("assets/stage.jpg"), ...ROSTER.map((id) => loadImage(`assets/${id}.png?v=${meta.version}`))]);
   const sheets = Object.fromEntries(ROSTER.map((id, i) => [id, imgs[i]]));
   R = createRenderer(canvas, { meta, sheets, stage });
   input = createInput(document, $("pad"), $("buttons"));
@@ -80,8 +81,11 @@ function applyLang() {
 function setPaused(p) {
   game.paused = p;
   $("menu").hidden = !p;
-  if (p) stopMusic();
-  else {
+  if (p) {
+    stopMusic();
+    $("resumeBtn").focus();               // arrow keys move from here
+  } else {
+    document.activeElement?.blur?.();
     input.clear();
     if (game.scene === "fight") startMusic();
   }
@@ -141,9 +145,23 @@ function bindUi() {
     stopMusic();
     go("title");
   });
+  // Pause menu by keyboard: arrows/WASD move the highlight, Enter/Z/J/Space press it, Esc/P resume.
   window.addEventListener("keydown", (e) => {
-    if (!game.paused || e.target.closest?.("#menu")) return;
-    if (e.code === "Escape" || e.code === "KeyP" || e.code === "Enter") setPaused(false);
+    if (!game.paused) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const items = [...$("menu").querySelectorAll("button")], at = items.indexOf(document.activeElement);
+    const step = { ArrowDown: 1, ArrowRight: 1, KeyS: 1, KeyD: 1, ArrowUp: -1, ArrowLeft: -1, KeyW: -1, KeyA: -1 }[e.code];
+    if (step) {
+      e.preventDefault();
+      items[(at + step + items.length) % items.length].focus();
+    } else if (e.code === "Escape" || e.code === "KeyP") {
+      e.preventDefault();
+      setPaused(false);
+    } else if (e.code === "Enter" && e.repeat) e.preventDefault();       // a held key must not press twice
+    else if (["KeyZ", "KeyJ", "Space"].includes(e.code)) {
+      e.preventDefault();
+      if (!e.repeat) (at >= 0 ? items[at] : items[0]).click();
+    } else if (at < 0 && e.code === "Enter") setPaused(false);
   });
   canvas.addEventListener("pointerdown", (e) => {
     const r = canvas.getBoundingClientRect();
@@ -155,12 +173,14 @@ function bindUi() {
 }
 
 // ---------- update ----------
-const SELECT = { size: 132, gap: 26, y: 330 };
+// In-fight banners sit in the band between the HUD and the fighters' heads.
+const BANNER_Y = 122;
+const SELECT = { size: 132, gap: 26, y: 292 };
 const selectX = (i) => VIEW_W / 2 - (ROSTER.length * SELECT.size + (ROSTER.length - 1) * SELECT.gap) / 2 + i * (SELECT.size + SELECT.gap);
 
 function startFight() {
   game.match = createMatch(game.player, game.ladder[game.stage]);
-  game.ai = createAi(game.stage + 1);
+  game.ai = createAi(Math.min(3, game.stage + 1));
   game.overT = 0;
   R.resetCamera();
   startMusic();
@@ -279,13 +299,13 @@ function draw() {
   if (s === "title") {
     R.resetCamera((STAGE_W - VIEW_W) / 2 + Math.sin(game.t / 240) * 100);
     R.drawStage(0.35);
-    ROSTER.forEach((id, i) => sprite(id, idleFrame(i * 7), 250 + i * 230, FLOOR_Y + 30, i === 2 ? -1 : 1, 1));
+    ROSTER.forEach((id, i) => sprite(id, idleFrame(i * 7), 150 + i * 220, FLOOR_Y + 30, i >= ROSTER.length / 2 ? -1 : 1, 0.72));   // small enough to clear the logo
     ctx.save();
     ctx.translate(VIEW_W / 2, 118);
     ctx.rotate(-0.035);
     text("AMIGOS", -150, -28, 96, { fill: "gold", stroke: "#7a1200", lineWidth: 14 });
-    text("VS.", 118, -6, 62, { fill: "#fff", stroke: "#c4001a", lineWidth: 12 });
     text("AMIGOS", 120, 62, 96, { fill: "gold", stroke: "#10104a", lineWidth: 14 });
+    text("VS.", 150, -44, 62, { fill: "#fff", stroke: "#c4001a", lineWidth: 12 });   // drawn last, clear of both AMIGOS
     ctx.restore();
     text(t("subtitle"), VIEW_W / 2, 238, 26, { fill: "#8fe9ff" });
     if (blink()) text(t(document.body.classList.contains("touch") ? "startTouch" : "start"), VIEW_W / 2, VIEW_H - 76, 30, { fill: "#fff" });
@@ -293,7 +313,7 @@ function draw() {
     backdrop(225);
     const id = ROSTER[game.cursor];
     text(t("choose"), VIEW_W / 2, 46, 44, { fill: "gold", stroke: "#7a1200" });
-    sprite(id, idleFrame(), 190, 330, 1, 1.05);
+    sprite(id, idleFrame(), 190, 330, 1, 0.95);
     text(FIGHTERS[id].name, VIEW_W / 2, 118, 64, { fill: "#fff", stroke: FIGHTERS[id].color, lineWidth: 12 });
     ROSTER.forEach((fid, i) => {
       portrait(fid, selectX(i), SELECT.y, SELECT.size);
@@ -320,14 +340,14 @@ function draw() {
     if (m.phase === "intro") {
       const cut = INTRO_FRAMES - 40;
       const last = m.fighters[0].wins === WINS_NEEDED - 1 && m.fighters[1].wins === WINS_NEEDED - 1;
-      if (m.t < cut) banner(last ? t("finalRound") : `${t("round")} ${m.round}`, m.t);
-      else banner(t("fight"), m.t - cut, 120);
+      if (m.t < cut) banner(last ? t("finalRound") : `${t("round")} ${m.round}`, m.t, 60, BANNER_Y);
+      else banner(t("fight"), m.t - cut, 76, BANNER_Y);
     } else if (m.phase === "ko" || m.phase === "over") {
       const w = m.phase === "over" ? m.winner : m.roundWinner, k = m.phase === "over" ? 999 : m.t;
-      if (k < 95) banner(t(game.endKind === "timeup" ? "timeup" : "ko"), k, 140);
+      if (k < 95) banner(t(game.endKind === "timeup" ? "timeup" : "ko"), k, 76, BANNER_Y);
       else {
-        banner(w === null ? t("draw") : t(w === 0 ? "youWin" : "youLose"), k - 95, 96);
-        if (w !== null && m.fighters[w].hp >= MAX_HP) text(t("perfect"), VIEW_W / 2, VIEW_H * 0.42 + 78, 44, { fill: "#8fe9ff" });
+        banner(w === null ? t("draw") : t(w === 0 ? "youWin" : "youLose"), k - 95, 64, BANNER_Y);
+        if (w !== null && m.fighters[w].hp >= MAX_HP) text(t("perfect"), VIEW_W / 2, BANNER_Y + 48, 32, { fill: "#8fe9ff" });
       }
     }
     if (game.paused) {
@@ -346,9 +366,12 @@ function draw() {
     R.resetCamera();
     R.drawStage(0.25);
     const others = ROSTER.filter((id) => id !== game.player);
-    sprite(others[0], danceFrame(3), 210, FLOOR_Y + 24, 1, 1);
-    sprite(others[1], danceFrame(6), VIEW_W - 210, FLOOR_Y + 24, -1, 1);
-    sprite(game.player, danceFrame(), VIEW_W / 2, FLOOR_Y + 50, 1, 1.25);
+    const half = Math.ceil(others.length / 2);       // friends cheer on both sides of the champion
+    others.forEach((id, i) => {
+      const left = i < half, n = left ? i : i - half, count = left ? half : others.length - half;
+      sprite(id, danceFrame(3 * (i + 1)), left ? 130 + n * 180 : VIEW_W - 130 - (count - 1 - n) * 180, FLOOR_Y + 24, left ? 1 : -1, 1);
+    });
+    sprite(game.player, danceFrame(), VIEW_W / 2, FLOOR_Y + 40, 1, 1.12);
     banner(t("congrats"), game.t, 78, 80);
     text(`${FIGHTERS[game.player].name} ${t("champion")}`, VIEW_W / 2, 150, 40, { fill: "#fff", stroke: FIGHTERS[game.player].color, lineWidth: 9 });
     if (game.t > 150 && blink()) text(t("thanks"), VIEW_W / 2, VIEW_H - 70, 28, { fill: "#8fe9ff" });

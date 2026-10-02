@@ -1,6 +1,6 @@
 # Amigos vs. Amigos
 
-A small arcade fighting game in the style of late-90s "vs." fighters, starring three
+A small arcade fighting game in the style of late-90s "vs." fighters, starring four
 friends. Plain HTML/CSS/JS: no build step, no runtime dependencies.
 
 ## Play
@@ -12,7 +12,7 @@ locally, serve the folder with any static server:
 npx serve -l 4173 .
 ```
 
-You pick a fighter and beat the other two, then your own shadow. Rounds are best of three.
+You pick a fighter and beat the other three, then your own shadow. Rounds are best of three.
 
 | Action | Touch | Keyboard |
 |---|---|---|
@@ -53,6 +53,9 @@ uv run --with numpy --with opencv-python-headless --with pillow tools/sprites.py
 uv run --with numpy --with opencv-python-headless --with pillow tools/sprites.py stage
 uv run --with numpy --with opencv-python-headless --with pillow tools/sprites.py atlas
 ```
+
+A new friend is made from one photo with local AI only (ComfyUI FLUX.2 klein): see
+`tools/new_fighter.py` and the `add-friend` skill in `.claude/skills/`.
 
 ## Tests
 

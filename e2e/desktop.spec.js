@@ -57,6 +57,32 @@ test("boots, toggles language, plays a round with the keyboard and pauses", asyn
   await expect(page.locator("#menu")).toBeVisible();
   expect(await page.evaluate(() => window.__game.paused)).toBe(true);
   await shot(page, "desktop-pause");
+
+  // Arrow keys walk the menu (wrapping), Enter presses the highlighted item, Esc resumes.
+  const focused = () => page.evaluate(() => document.activeElement?.id);
+  expect(await focused()).toBe("resumeBtn");
+  await page.keyboard.press("ArrowDown");
+  expect(await focused()).toBe("soundBtn");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  expect(await focused()).toBe("quitBtn");
+  await page.keyboard.press("ArrowDown");
+  expect(await focused()).toBe("resumeBtn");
+  await page.keyboard.press("ArrowUp");
+  expect(await focused()).toBe("quitBtn");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("Enter");
+  expect(await page.locator("#soundBtn").textContent()).toContain("off");
+  await page.keyboard.press("Enter");
+  await shot(page, "desktop-pause-keys");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#menu")).toBeHidden();
+  expect(await page.evaluate(() => window.__game.paused)).toBe(false);
+
+  await page.waitForTimeout(250);                      // let the game read the key release first
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#menu")).toBeVisible();
   await page.getByRole("button", { name: "Resume" }).click();
   await expect(page.locator("#menu")).toBeHidden();
 

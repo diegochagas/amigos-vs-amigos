@@ -35,7 +35,7 @@ async function finishMatch(page, loser) {
   }
 }
 
-test("arcade ladder: beat both friends and the shadow, see the ending; losing offers a continue", async ({ page }) => {
+test("arcade ladder: beat the three friends and the shadow, see the ending; losing offers a continue", async ({ page }) => {
   test.setTimeout(240_000);
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
@@ -57,9 +57,9 @@ test("arcade ladder: beat both friends and the shadow, see the ending; losing of
   await page.keyboard.press("Enter");
   await scene(page, "vs");
 
-  for (let stage = 0; stage < 3; stage++) {
+  for (let stage = 0; stage < 4; stage++) {
     expect(await page.evaluate(() => window.__game.scene)).toBe("vs");
-    if (stage === 2) {
+    if (stage === 3) {
       await page.waitForTimeout(500);
       await shot(page, "desktop-vs-shadow");
     }

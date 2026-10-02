@@ -11,7 +11,9 @@ Every frame is a CELL_W x CELL_H RGBA image with the feet at (ANCHOR_X, ANCHOR_Y
 so the game never needs per-frame offsets.
 Run with: uv run --with numpy --with opencv-python-headless --with pillow tools/sprites.py ...
 """
+import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -21,7 +23,8 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "art-src"
-FIGHTERS = ["jose", "rachel", "diego"]
+# Fighter ids come from the game's own roster so a new friend only needs adding there.
+FIGHTERS = re.findall(r'"(\w+)"', re.search(r"ROSTER = \[(.*?)\]", (ROOT / "js" / "config.js").read_text()).group(1))
 CELL_W, CELL_H = 560, 360
 ANCHOR_X, ANCHOR_Y = 280, 352
 STAND_H = 264                       # standing height in game pixels
@@ -42,7 +45,9 @@ def fg_mask(rgb):
     edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
     drop = np.zeros(n, bool)
     for i in range(1, n):
-        drop[i] = i in edge or stats[i, cv2.CC_STAT_AREA] > 1500 or g[lab == i].mean() < 25
+        area, comp = stats[i, cv2.CC_STAT_AREA], lab == i
+        drop[i] = (i in edge or area > 1500 or g[comp].mean() < 25
+                   or (area > 80 and (np.minimum(r, b)[comp] - g[comp]).mean() > 170))   # pocket of pure backdrop
     fg = ~drop[lab]
     rows = fg.mean(1) > 0.85            # a drawn ground line spans the whole sheet
     rows[: int(len(rows) * 0.85)] = False
@@ -114,6 +119,8 @@ def cut_sheet(path, n):
 
 def bases():
     for c in FIGHTERS:
+        if not (SRC / "sheets" / f"{c}_idle.png").exists():
+            continue                    # fighters made by new_fighter.py have no sheets
         out = SRC / "frames" / c
         out.mkdir(parents=True, exist_ok=True)
         for kind, n in (("idle", 4), ("dance", 6)):
@@ -153,7 +160,29 @@ def pose(c, name, image):
     rgba = np.dstack([despill(rgb, m), (m * 255).astype(np.uint8)])
     out = SRC / "frames" / c
     out.mkdir(parents=True, exist_ok=True)
-    to_cell(rgba, scale, (ax, y1)).save(out / f"{name}.png")
+    cell = to_cell(rgba, scale, (ax, y1))
+    ref = out / "idle_0.png"
+    if name != "idle_0" and name.split("_")[0] in ("idle", "dance") and ref.exists():
+        cell = shift_to(cell, torso_x(Image.open(ref)))
+    cell.save(out / f"{name}.png")
+
+
+def torso_x(cell):
+    """Horizontal centre of the head and chest: the part that should not wander between idle frames."""
+    a = np.array(cell)[..., 3] > 0
+    ys, xs = np.where(a)
+    top, h = ys.min(), ys.max() - ys.min()
+    return np.where(a[top:top + int(h * 0.5)])[1].mean()
+
+
+def shift_to(cell, x):
+    """The model sometimes drifts sideways between frames; keep idle/dance frames on idle_0's torso."""
+    dx = int(round(x - torso_x(cell)))
+    if abs(dx) < 2:
+        return cell
+    out = Image.new("RGBA", cell.size, (0, 0, 0, 0))
+    out.paste(cell, (dx, 0))
+    return out
 
 
 def portrait_box(cell):
@@ -182,13 +211,15 @@ def atlas():
         meta["fighters"][c] = names
         meta["portraits"][c] = portrait_box(Image.open(SRC / "frames" / c / "idle_0.png"))
         print(c, len(names), "frames; missing:", [n for n in ORDER if n not in names])
+    meta["version"] = hashlib.sha1(b"".join((ROOT / "assets" / f"{c}.png").read_bytes() for c in FIGHTERS)).hexdigest()[:10]
     (ROOT / "assets" / "sprites.json").write_text(json.dumps(meta, indent=1) + "\n")
-    # Home-screen / tab icon: the three heads side by side.
+    # Home-screen / tab icon: the heads of the roster.
     icon = Image.new("RGBA", (192, 192), (16, 16, 74, 255))
-    for i, c in enumerate(FIGHTERS):
+    spots = [(0, 0), (96, 0), (0, 96), (96, 96)] if len(FIGHTERS) > 3 else [(0, 0), (96, 0), (48, 96)]
+    for i, c in enumerate(FIGHTERS[:len(spots)]):
         x, y, w, h = meta["portraits"][c]
         head = Image.open(SRC / "frames" / c / "idle_0.png").crop((x, y, x + w, y + h)).resize((96, 96), Image.LANCZOS)
-        icon.alpha_composite(head, [(0, 0), (96, 0), (48, 96)][i])
+        icon.alpha_composite(head, spots[i])
     icon.save(ROOT / "assets" / "icon.png", optimize=True)
     icon.resize((512, 512), Image.LANCZOS).save(ROOT / "assets" / "icon-512.png", optimize=True)
 

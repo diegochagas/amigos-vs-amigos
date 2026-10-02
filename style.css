@@ -69,5 +69,6 @@ body.touch #buttons { display: flex; }
 #menu[hidden] { display: none; }
 #menu h2 { margin: 0 0 4px; font-style: italic; color: #ffd21e; }
 #menu button { padding: 11px; border: 2px solid #fff; border-radius: 8px; background: #1c2a8c; color: #fff; font: inherit; font-size: 16px; cursor: pointer; }
+#menu button:focus { outline: 3px solid #ffe600; outline-offset: 2px; background: #2b3fd6; }
 #menu p { margin: 2px 0 0; font: 13px/1.35 Arial, sans-serif; color: #cfe6ff; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

@@ -29,7 +29,7 @@ test("phone in landscape: touch controls overlay the game and drive the fighter"
 
   await tapCanvas(page, 0.5, 0.5);
   await page.waitForFunction(() => window.__game.scene === "select");
-  await tapCanvas(page, 0.5 + 158 / 960, 0.73);         // third portrait
+  await tapCanvas(page, 0.5 + 79 / 960, 0.73);          // third portrait of four
   await page.waitForTimeout(200);
   await shot(page, "phone-select");
   await page.touchscreen.tap(...(await centre(page.locator('[data-btn="a"]'))));

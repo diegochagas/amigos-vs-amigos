@@ -40,8 +40,9 @@ export const HURT = {
 };
 
 export const FIGHTERS = {
-  jose: { name: "JOSÉ", color: "#ff8a1e", glow: "#ffd23c" },
-  rachel: { name: "RACHEL", color: "#ff3d6e", glow: "#ffb0d0" },
-  diego: { name: "DIEGO", color: "#2ea8ff", glow: "#b8f0ff" },
+  jose: { name: "JOSÉ", color: "#ff8a1e", glow: "#ffd23c", height: 1.12 },
+  rachel: { name: "RACHEL", color: "#ff3d6e", glow: "#ffb0d0", height: 0.9 },
+  diego: { name: "DIEGO", color: "#2ea8ff", glow: "#b8f0ff", height: 1 },
+  erick: { name: "ERICK", color: "#38d66b", glow: "#c4ffd6", height: 1.12 },
 };
-export const ROSTER = ["jose", "rachel", "diego"];
+export const ROSTER = ["jose", "rachel", "diego", "erick"];
