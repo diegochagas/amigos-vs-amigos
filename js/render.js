@@ -1,5 +1,5 @@
 // Canvas drawing: stage, fighters, effects and HUD. Reads match state, never changes it.
-import { VIEW_W, VIEW_H, STAGE_W, FLOOR_Y, MAX_HP, MAX_METER, MOVES, PROJECTILE, FIGHTERS, WINS_NEEDED } from "./config.js";
+import { VIEW_W, VIEW_H, STAGE_W, FLOOR_Y, MAX_HP, MAX_METER, MOVES, PROJECTILE, FIGHTERS, WINS_NEEDED, HYPER_FREEZE } from "./config.js";
 import { t } from "./i18n.js";
 
 const FONT = '"Arial Black", "Arial Bold", Impact, "Helvetica Neue", Arial, sans-serif';
@@ -172,9 +172,10 @@ export function createRenderer(canvas, assets) {
     ctx.restore();
   }
 
-  // MvC-style cut-in: the attacker's cartoon portrait slides in from their side of the
-  // screen in a slanted panel when a special starts; hypers hold it through the flash.
-  // One slot per fighter, so two specials at once show both portraits.
+  // MvC-style cut-in: when a hyper (A+B at MAX) starts, the attacker's cartoon portrait
+  // slides in from their side of the screen in a slanted panel while the match is frozen
+  // for HYPER_FREEZE frames (2 s), then slides out as the beam comes.
+  // One slot per fighter, so two hypers at once show both portraits.
   const cutin = [null, null];
   const CUT_W = 410, CUT_SLANT = 70;
   function drawCutins(m) {
@@ -364,8 +365,7 @@ export function createRenderer(canvas, assets) {
           fx.push({ kind: "hit", x: e.x, y: e.y, t: 0, life: e.heavy ? 16 : 11, heavy: e.heavy, rot: tick });
           shake = e.heavy ? 9 : 5;
         } else if (e.type === "block") fx.push({ kind: "block", x: e.x, y: e.y, t: 0, life: 12 });
-        else if (e.type === "special") cutin[e.who] = { t: 0, life: 30 };
-        else if (e.type === "super") cutin[e.who] = { t: 0, life: 58 };
+        else if (e.type === "super") cutin[e.who] = { t: 0, life: HYPER_FREEZE + 8 };
         else if (e.type === "ko" || e.type === "thud") shake = 14;
       }
     },

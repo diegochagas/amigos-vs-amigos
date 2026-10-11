@@ -247,7 +247,7 @@ function update() {
         sfx("ko");
       } else if (e.type === "over") sfx(e.who === 0 ? "win" : "lose");
       else sfx(e.type);
-      if (e.type === "special" || e.type === "super") voice(m.fighters[e.who].id);   // shout with the cut-in
+      if (e.type === "super") voice(m.fighters[e.who].id);   // shout with the hyper cut-in
     }
     if (m.phase === "over" && ++game.overT > 40) {
       stopMusic();

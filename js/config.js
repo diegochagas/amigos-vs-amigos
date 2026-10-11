@@ -20,6 +20,7 @@ export const BODY_GAP = 74;         // fighters can't stand closer than this
 export const MAX_SPREAD = VIEW_W - 150;
 
 export const INTRO_FRAMES = 130;
+export const HYPER_FREEZE = 120;    // the whole match pauses on the cut-in for 2 s before the beam
 export const KO_FRAMES = 190;
 export const WIN_FRAMES = 170;
 

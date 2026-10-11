@@ -53,14 +53,18 @@ test("boots, toggles language, plays a round with the keyboard and pauses", asyn
   await page.keyboard.up("KeyX");
   await shot(page, "desktop-fight");
 
-  // A + B fires the special: the attacker's cut-in portrait slides in from their side.
+  // A + B at MAX fires the hyper: the attacker's cut-in portrait slides in from their side.
+  await page.evaluate(() => { window.__game.match.fighters[0].meter = 100; });
   await page.keyboard.down("KeyZ");
   await page.keyboard.down("KeyX");
-  await page.waitForFunction(() => window.__game.match.fighters[0].state === "special");
+  await page.waitForFunction(() => window.__game.match.fighters[0].state === "hyper");
   await page.keyboard.up("KeyZ");
   await page.keyboard.up("KeyX");
-  await page.waitForTimeout(180);
-  await shot(page, "desktop-special");
+  await page.waitForTimeout(1000);
+  await shot(page, "desktop-hyper");
+  // The match stays frozen on the portrait for 2 s, then the beam fires.
+  expect(await page.evaluate(() => window.__game.match.freeze)).toBeGreaterThan(0);
+  await page.waitForFunction(() => window.__game.match.freeze === 0 && window.__game.match.fighters[0].state === "hyper", null, { timeout: 5000 });
 
   await page.keyboard.press("Escape");
   await expect(page.locator("#menu")).toBeVisible();

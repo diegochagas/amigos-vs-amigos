@@ -8,7 +8,7 @@
           look at it, rerun with another --seed until it is right
   frames  the other 3 idle frames, the 10 combat poses and 6 dance frames, keyed into
           art-src/frames/<id>/
-  cutin   the Marvel-vs-Capcom style close-up shown when the special fires (tools/cutin.py)
+  cutin   the Marvel-vs-Capcom style close-up shown when the hyper fires (tools/cutin.py)
   voice   the shout played with it (tools/voice.py; needs --shout and --voice)
   all     base + frames + cutin + voice (then run sprites.py atlas)
 

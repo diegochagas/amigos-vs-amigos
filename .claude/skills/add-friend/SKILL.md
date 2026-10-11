@@ -1,6 +1,6 @@
 ---
 name: add-friend
-description: Add a new playable friend to Amigos vs. Amigos from one photo and a name. Draws the arcade sprites (idle, 10 combat poses, a dance, the special-move cut-in portrait and its shout) with local AI only (ComfyUI FLUX.2 klein, no credits) and registers the fighter in the game. Use when Diego says "add a new player", "new friend/fighter", "adiciona o <nome> no jogo", or gives a photo plus a name for the fighting game.
+description: Add a new playable friend to Amigos vs. Amigos from one photo and a name. Draws the arcade sprites (idle, 10 combat poses, a dance, the hyper-move cut-in portrait and its shout) with local AI only (ComfyUI FLUX.2 klein, no credits) and registers the fighter in the game. Use when Diego says "add a new player", "new friend/fighter", "adiciona o <nome> no jogo", or gives a photo plus a name for the fighting game.
 ---
 
 # add-friend
@@ -27,7 +27,7 @@ Everything runs locally; nothing is sent to Higgsfield or any paid service. Take
    Existing files are kept, so to redo one frame delete `art-src/poses/<id>_<name>.png`, rerun with a different `--seed`.
 4. Register in `js/config.js`: add the id to `ROSTER` and an entry in `FIGHTERS` (`name`, a unique `color` + light `glow`, `height` relative to Diego = 1; ask Diego if unknown). `sprites.py` reads the roster from there.
 5. Skin tone (only if the friend's skin is darker than the template's light skin and the model drew it pale): recolour the existing frames instead of regenerating: `python3 tools/skin_tone.py <id> 0.74 --sat 1.4 --hue 12` (factor < 1 darkens, --hue sets a warm brown; these values = Erick's medium brown (0.55 + sat 1.75 and 0.67 + sat 1.5 were too dark); without --hue a plain darken just looks like a shadow, 0.78 + sat 1.3 was too light for him; starts from `art-src/frames_orig/<id>`, so rerun freely). It must run AFTER every frame is keyed, and re-keying a frame (`sprites.py pose`) needs `rm -r art-src/frames_orig/<id>` first.
-5b. Cut-in check: `assets/cutin/<id>.png` is the MvC-style close-up shown when the special fires (chest up, shouting, fist at the camera, same style, keyed from magenta). Look at it next to `art-src/cutin/<id>.png`. If it is the wrong person, a full body, or pixel art, redo only it: `python3 tools/cutin.py <id> --seed <n> --look "..."`. It is drawn from the keyed `special` pose, so redo it after any change to that pose. Skin tone is NOT applied to it: put the skin colour in `--look` instead.
+5b. Cut-in check: `assets/cutin/<id>.png` is the MvC-style close-up shown for 2 s when the hyper (A+B at MAX) fires (chest up, shouting, fist at the camera, same style, keyed from magenta). Look at it next to `art-src/cutin/<id>.png`. If it is the wrong person, a full body, or pixel art, redo only it: `python3 tools/cutin.py <id> --seed <n> --look "..."`. It is drawn from the keyed `special` pose, so redo it after any change to that pose. Skin tone is NOT applied to it: put the skin colour in `--look` instead.
 5c. Shout check: `assets/voice/<id>.mp3` (under 15 KB, 0.3–0.7 s). Redo it alone with `python3 tools/voice.py <id> --text "..." --voice ... --pitch ...`, then add the entry to `SHOUTS` in `tools/voice.py` so `--all` regenerates it.
 6. Atlas + portrait + icon + asset version: `python3 tools/sprites.py atlas` (the version hash covers the cut-ins, so run it after every cut-in change).
 7. Contact-sheet check: paste the 20 `art-src/frames/<id>/*.png` onto a dark tile and look at it (stray magenta, cut-off limbs, wrong face). Regenerate bad frames (step 3 note) and re-run `sprites.py pose <id> <name> <png>` + `atlas`.
@@ -40,5 +40,5 @@ Everything runs locally; nothing is sent to Higgsfield or any paid service. Take
 - Pure-magenta backdrop; `sprites.py` keys it out (and enclosed pockets of it, e.g. behind an elbow).
 - Heights are visual only (`FIGHTERS[id].height`); hit boxes are shared.
 - The cut-in is a woman trap: klein copied the template's beard onto Rachel until the `--look` said "young WOMAN, smooth feminine face, absolutely no beard, no goatee, no facial hair". Say it for every woman.
-- The cut-in is drawn by `js/render.js drawCutin` from the `special` / `super` match events; nothing per-fighter to add in JS.
+- The cut-in is drawn by `js/render.js drawCutin` from the `super` match event; nothing per-fighter to add in JS.
 - Never put the real photo in git: `art-src/` stays ignored, only the atlas PNG is committed.

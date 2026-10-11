@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Make the shout a fighter yells when their special cut-in appears, with a local TTS (Piper).
+"""Make the shout a fighter yells when their hyper cut-in appears, with a local TTS (Piper).
 
   python tools/voice.py <id> [--text "Toma!"] [--voice male|female|deep|pt] [--pitch 1.0]
   python tools/voice.py --all

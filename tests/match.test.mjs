@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { createRng } from "../js/rng.js";
 import { createMatch, step, NO_INPUT, hurtBox, attackBox } from "../js/match.js";
 import { createAi, aiInput } from "../js/ai.js";
-import { INTRO_FRAMES, TIMER_TICK, MAX_HP, MAX_METER, MOVES, STAGE_W, EDGE, BODY_GAP, WINS_NEEDED } from "../js/config.js";
+import { INTRO_FRAMES, HYPER_FREEZE, TIMER_TICK, MAX_HP, MAX_METER, MOVES, STAGE_W, EDGE, BODY_GAP, WINS_NEEDED } from "../js/config.js";
 
 const inp = (keys) => ({ ...NO_INPUT, ...keys });
 function ready() {
@@ -90,7 +90,7 @@ test("pressing B just after A still gives the special (touch screens)", () => {
 test("a full meter turns A+B into the hyper, which empties the meter and hits many times", () => {
   const m = ready();
   m.fighters[0].meter = MAX_METER;
-  const ev = run(m, 1, inp({ a: true, b: true })).concat(run(m, 160));
+  const ev = run(m, 1, inp({ a: true, b: true })).concat(run(m, HYPER_FREEZE + 160));   // the cut-in freeze comes first
   assert.ok(ev.some((e) => e.type === "super"));
   assert.equal(m.fighters[0].meter, 0);
   assert.ok(ev.filter((e) => e.type === "hit").length >= 4);
@@ -230,4 +230,18 @@ test("a special announces itself once so the cut-in can show; a hyper announces 
   ev = run(m, 1, inp({ a: true, b: true }));
   assert.ok(ev.some((e) => e.type === "super"));
   assert.ok(!ev.some((e) => e.type === "special"));
+});
+
+test("a hyper freezes the whole match for two seconds before the beam can hit", () => {
+  const m = ready();
+  m.fighters[0].meter = MAX_METER;
+  run(m, 1, inp({ a: true, b: true }));
+  assert.equal(m.freeze, HYPER_FREEZE);
+  assert.equal(HYPER_FREEZE, 120);
+  run(m, HYPER_FREEZE - 1, inp({ right: true }), inp({ a: true }));
+  assert.equal(m.fighters[0].t, 0, "nobody moves while frozen");
+  assert.equal(m.fighters[1].state, "idle");
+  assert.equal(m.fighters[1].hp, MAX_HP);
+  run(m, MOVES.hyper.startup + 10);
+  assert.ok(m.fighters[1].hp < MAX_HP, "the beam lands once the freeze ends");
 });

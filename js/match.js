@@ -1,5 +1,5 @@
 // Pure fight logic: no DOM, no timers, no Math.random. step() advances one 60 Hz frame.
-import {
+import { HYPER_FREEZE,
   STAGE_W, MAX_HP, MAX_METER, ROUND_TIME, TIMER_TICK, WINS_NEEDED, WALK_FWD, WALK_BACK,
   JUMP_VY, JUMP_VX, GRAVITY, EDGE, BODY_GAP, MAX_SPREAD, INTRO_FRAMES, KO_FRAMES, WIN_FRAMES,
   MOVES, PROJECTILE, HURT,
@@ -65,7 +65,7 @@ function startSuper(f, m) {
   if (f.meter >= MAX_METER) {
     f.meter = 0;
     setState(f, "hyper");
-    m.freeze = 34;
+    m.freeze = HYPER_FREEZE;
     m.events.push({ type: "super", who: f.side });
   } else {
     setState(f, "special");

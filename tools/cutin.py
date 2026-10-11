@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draw the Marvel-vs-Capcom style cut-in portrait shown when a fighter fires a special.
+"""Draw the Marvel-vs-Capcom style cut-in portrait shown when a fighter fires a hyper (A+B at MAX).
 
   COMFY_CLIENT_DIR=<folder holding comfy_client.py> python tools/cutin.py <id> [--seed 4] [--look "..."]
   python tools/cutin.py <id> --key                     only re-key an existing art-src/cutin/<id>.png
