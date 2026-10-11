@@ -7,7 +7,7 @@ const STAGE_H = 792, STAGE_Y = -190;        // stage image is drawn 1180 wide; i
 
 export function createRenderer(canvas, assets) {
   const ctx = canvas.getContext("2d");
-  const { meta, sheets, stage } = assets;
+  const { meta, sheets, stage, cutins = {} } = assets;
   const [CW, CH] = meta.cell, [AX, AY] = meta.anchor;
   const fx = [];                             // sparks and flashes, render-side only
   let camX = (STAGE_W - VIEW_W) / 2, shake = 0, tick = 0;
@@ -172,6 +172,60 @@ export function createRenderer(canvas, assets) {
     ctx.restore();
   }
 
+  // MvC-style cut-in: the attacker's cartoon portrait slides in from their side of the
+  // screen in a slanted panel when a special starts; hypers hold it through the flash.
+  // One slot per fighter, so two specials at once show both portraits.
+  const cutin = [null, null];
+  const CUT_W = 410, CUT_SLANT = 70;
+  function drawCutins(m) {
+    for (const side of [0, 1]) if (cutin[side]) drawCutin(m, side);
+  }
+  function drawCutin(m, side) {
+    const c = cutin[side], f = m.fighters[side], img = cutins[f.id];
+    if (++c.t > c.life || !img) return void (cutin[side] = null);
+    const left = f.x - camX < VIEW_W / 2;
+    const k = c.t < 7 ? 1 - (1 - c.t / 7) ** 3 : c.t > c.life - 7 ? ((c.life - c.t) / 7) ** 2 : 1;
+    const off = (CUT_W + CUT_SLANT) * (1 - k), col = FIGHTERS[f.id];
+    ctx.save();
+    ctx.translate(left ? -off : VIEW_W + off, 0);
+    if (!left) ctx.scale(-1, 1);                   // panel and portrait face the middle
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(CUT_W + CUT_SLANT, 0);
+    ctx.lineTo(CUT_W, VIEW_H);
+    ctx.lineTo(0, VIEW_H);
+    ctx.closePath();
+    ctx.clip();
+    ctx.fillStyle = "#06061e";
+    ctx.fillRect(0, 0, CUT_W + CUT_SLANT, VIEW_H);
+    // burst lines from behind the portrait, in the fighter's colour
+    ctx.strokeStyle = col.color;
+    ctx.globalAlpha = 0.55;
+    for (let i = 0; i < 18; i++) {
+      const a = (i / 18) * Math.PI * 2 + c.t * 0.05;
+      ctx.lineWidth = 3 + (i % 3) * 5;
+      ctx.beginPath();
+      ctx.moveTo(CUT_W * 0.45, VIEW_H * 0.55);
+      ctx.lineTo(CUT_W * 0.45 + Math.cos(a) * 900, VIEW_H * 0.55 + Math.sin(a) * 900);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    // portrait: fills the height, nudged in with a quick zoom-settle
+    const z = 1.12 - 0.12 * Math.min(1, c.t / 9), h = VIEW_H * 1.04 * z, w = (img.width / img.height) * h;
+    ctx.drawImage(img, CUT_W * 0.5 - w * 0.5 + 10, VIEW_H - h + 8, w, h);
+    // edge stripe
+    ctx.lineWidth = 12;
+    ctx.strokeStyle = "#fff";
+    ctx.beginPath();
+    ctx.moveTo(CUT_W + CUT_SLANT - 4, -10);
+    ctx.lineTo(CUT_W - 4, VIEW_H + 10);
+    ctx.stroke();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = col.color;
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function drawFx() {
     for (let i = fx.length - 1; i >= 0; i--) {
       const e = fx[i], k = e.t / e.life;
@@ -302,6 +356,7 @@ export function createRenderer(canvas, assets) {
       camX = x;
       lag[0] = lag[1] = 1;
       fx.length = 0;
+      cutin[0] = cutin[1] = null;
     },
     consume(events) {
       for (const e of events) {
@@ -309,6 +364,8 @@ export function createRenderer(canvas, assets) {
           fx.push({ kind: "hit", x: e.x, y: e.y, t: 0, life: e.heavy ? 16 : 11, heavy: e.heavy, rot: tick });
           shake = e.heavy ? 9 : 5;
         } else if (e.type === "block") fx.push({ kind: "block", x: e.x, y: e.y, t: 0, life: 12 });
+        else if (e.type === "special") cutin[e.who] = { t: 0, life: 30 };
+        else if (e.type === "super") cutin[e.who] = { t: 0, life: 58 };
         else if (e.type === "ko" || e.type === "thud") shake = 14;
       }
     },
@@ -345,6 +402,7 @@ export function createRenderer(canvas, assets) {
       for (const p of m.projectiles) drawProjectile(p, m.fighters[p.owner].id);
       drawFx();
       ctx.restore();
+      drawCutins(m);
       drawHud(m, labels);
     },
   };

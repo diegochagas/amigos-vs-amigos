@@ -50,6 +50,8 @@ test("sprite atlas has every frame the game draws, for every fighter", () => {
     assert.deepEqual(need.filter((n) => !meta.fighters[id].includes(n)), [], id);
     assert.equal(meta.portraits[id].length, 4);
     assert.ok(existsSync(new URL(`../assets/${id}.png`, import.meta.url)), `${id}.png`);
+    assert.ok(existsSync(new URL(`../assets/cutin/${id}.png`, import.meta.url)), `cutin/${id}.png`);
+    assert.ok(existsSync(new URL(`../assets/voice/${id}.mp3`, import.meta.url)), `voice/${id}.mp3`);
   }
   assert.ok(existsSync(new URL("../assets/stage.jpg", import.meta.url)));
 });

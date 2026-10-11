@@ -53,6 +53,15 @@ test("boots, toggles language, plays a round with the keyboard and pauses", asyn
   await page.keyboard.up("KeyX");
   await shot(page, "desktop-fight");
 
+  // A + B fires the special: the attacker's cut-in portrait slides in from their side.
+  await page.keyboard.down("KeyZ");
+  await page.keyboard.down("KeyX");
+  await page.waitForFunction(() => window.__game.match.fighters[0].state === "special");
+  await page.keyboard.up("KeyZ");
+  await page.keyboard.up("KeyX");
+  await page.waitForTimeout(180);
+  await shot(page, "desktop-special");
+
   await page.keyboard.press("Escape");
   await expect(page.locator("#menu")).toBeVisible();
   expect(await page.evaluate(() => window.__game.paused)).toBe(true);

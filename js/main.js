@@ -6,7 +6,7 @@ import { createAi, aiInput } from "./ai.js";
 import { createInput } from "./input.js";
 import { createRenderer } from "./render.js";
 import { t, setLang, getLang, pickLang } from "./i18n.js";
-import { initAudio, sfx, startMusic, stopMusic, setMuted, isMuted } from "./audio.js";
+import { initAudio, sfx, voice, loadVoices, startMusic, stopMusic, setMuted, isMuted } from "./audio.js";
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -36,9 +36,13 @@ async function boot() {
   applyLang();
   const meta = await (await fetch("assets/sprites.json", { cache: "no-cache" })).json();
   // ?v= changes whenever an atlas does, so a browser never keeps showing an old fighter.
-  const [stage, ...imgs] = await Promise.all([loadImage("assets/stage.jpg"), ...ROSTER.map((id) => loadImage(`assets/${id}.png?v=${meta.version}`))]);
+  const [stage, ...imgs] = await Promise.all([loadImage("assets/stage.jpg"),
+    ...ROSTER.map((id) => loadImage(`assets/${id}.png?v=${meta.version}`)),
+    ...ROSTER.map((id) => loadImage(`assets/cutin/${id}.png?v=${meta.version}`))]);
   const sheets = Object.fromEntries(ROSTER.map((id, i) => [id, imgs[i]]));
-  R = createRenderer(canvas, { meta, sheets, stage });
+  loadVoices(Object.fromEntries(ROSTER.map((id) => [id, `assets/voice/${id}.mp3?v=${meta.version}`])));   // not awaited: silence until ready
+  const cutins = Object.fromEntries(ROSTER.map((id, i) => [id, imgs[ROSTER.length + i]]));
+  R = createRenderer(canvas, { meta, sheets, stage, cutins });
   input = createInput(document, $("pad"), $("buttons"));
   if (matchMedia("(pointer: coarse)").matches || params.get("touch") === "1") document.body.classList.add("touch");
   window.addEventListener("touchstart", () => document.body.classList.add("touch"), { once: true, passive: true });
@@ -243,6 +247,7 @@ function update() {
         sfx("ko");
       } else if (e.type === "over") sfx(e.who === 0 ? "win" : "lose");
       else sfx(e.type);
+      if (e.type === "special" || e.type === "super") voice(m.fighters[e.who].id);   // shout with the cut-in
     }
     if (m.phase === "over" && ++game.overT > 40) {
       stopMusic();

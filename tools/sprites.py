@@ -211,7 +211,8 @@ def atlas():
         meta["fighters"][c] = names
         meta["portraits"][c] = portrait_box(Image.open(SRC / "frames" / c / "idle_0.png"))
         print(c, len(names), "frames; missing:", [n for n in ORDER if n not in names])
-    meta["version"] = hashlib.sha1(b"".join((ROOT / "assets" / f"{c}.png").read_bytes() for c in FIGHTERS)).hexdigest()[:10]
+    shipped = [ROOT / "assets" / f"{c}.png" for c in FIGHTERS] + sorted((ROOT / "assets" / "cutin").glob("*.png")) + sorted((ROOT / "assets" / "voice").glob("*.mp3"))
+    meta["version"] = hashlib.sha1(b"".join(p.read_bytes() for p in shipped if p.exists())).hexdigest()[:10]
     (ROOT / "assets" / "sprites.json").write_text(json.dumps(meta, indent=1) + "\n")
     # Home-screen / tab icon: the heads of the roster.
     icon = Image.new("RGBA", (192, 192), (16, 16, 74, 255))

@@ -55,7 +55,9 @@ uv run --with numpy --with opencv-python-headless --with pillow tools/sprites.py
 ```
 
 A new friend is made from one photo with local AI only (ComfyUI FLUX.2 klein): see
-`tools/new_fighter.py` and the `add-friend` skill in `.claude/skills/`.
+`tools/new_fighter.py` and the `add-friend` skill in `.claude/skills/`. The close-up shown
+when a special fires comes from `tools/cutin.py` (same model, from the fighter's special pose)
+and the shout played with it from `tools/voice.py` (Piper TTS + ffmpeg).
 
 ## Tests
 

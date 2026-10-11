@@ -1,5 +1,33 @@
-// Tiny WebAudio synth: sound effects and a looping chiptune, no audio files.
+// Tiny WebAudio synth: sound effects and a looping chiptune. The only samples are the
+// fighters' shouts (assets/voice/<id>.mp3), decoded on first use.
 let ctx = null, master = null, musicTimer = null, muted = false, noiseBuf = null;
+const voices = {};                 // id -> ArrayBuffer (undecoded) | AudioBuffer
+
+export async function loadVoices(urls) {
+  await Promise.all(Object.entries(urls).map(async ([id, url]) => {
+    try {
+      voices[id] = await (await fetch(url)).arrayBuffer();
+    } catch { /* a missing shout only means silence */ }
+  }));
+}
+
+// Plays a fighter's shout. Decoding needs the AudioContext, so it happens lazily here;
+// the callback form of decodeAudioData is the one every mobile browser supports.
+export function voice(id) {
+  const v = voices[id];
+  if (!ctx || muted || !v) return;
+  const play = (buf) => {
+    const s = ctx.createBufferSource(), g = ctx.createGain();
+    s.buffer = buf;
+    g.gain.value = 0.9;
+    s.connect(g).connect(master);
+    s.start();
+  };
+  if (v instanceof ArrayBuffer) {
+    voices[id] = null;            // no double decode while the first one is in flight
+    ctx.decodeAudioData(v.slice(0), (buf) => play((voices[id] = buf)), () => {});
+  } else if (v) play(v);
+}
 
 export function initAudio() {
   if (ctx) return ctx.resume();

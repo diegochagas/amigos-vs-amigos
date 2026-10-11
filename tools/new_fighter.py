@@ -7,7 +7,10 @@
   base    photo -> art-src/poses/<id>_base.png (the idle frame on magenta, in the house style);
           look at it, rerun with another --seed until it is right
   frames  the other 3 idle frames, the 10 combat poses and 6 dance frames, keyed into
-          art-src/frames/<id>/ (then run sprites.py atlas)
+          art-src/frames/<id>/
+  cutin   the Marvel-vs-Capcom style close-up shown when the special fires (tools/cutin.py)
+  voice   the shout played with it (tools/voice.py; needs --shout and --voice)
+  all     base + frames + cutin + voice (then run sprites.py atlas)
 
 Style and size come from art-src/poses/<template>_base.png (default diego): the model is
 told to swap the character for the person in the photo and keep everything else.
@@ -83,12 +86,19 @@ def main():
     ap.add_argument("--dance", default="robot", choices=sorted(DANCES))
     ap.add_argument("--seed", type=int, default=4)
     ap.add_argument("--template", default="diego")
-    ap.add_argument("--step", default="all", choices=["base", "frames", "all"])
+    ap.add_argument("--step", default="all", choices=["base", "frames", "cutin", "voice", "all"])
+    ap.add_argument("--shout", default="", help='the word yelled with the cut-in, e.g. "Toma!"')
+    ap.add_argument("--voice", default="", help="Piper voice: female, male, deep or pt (female for a woman)")
+    ap.add_argument("--pitch", type=float, default=1.0)
     a = ap.parse_args()
     if not comfy_client.available("klein"):
         sys.exit(1)
     POSES.mkdir(parents=True, exist_ok=True)
     base_path = POSES / f"{a.id}_base.png"
+    if a.step == "cutin":
+        return cutin(a)
+    if a.step == "voice":
+        return voice(a)
     if a.step in ("base", "all"):
         cv2.imwrite(str(base_path), swap_in_photo(a.photo, a.look, a.seed, a.template))
         print(f"wrote {base_path} - check it before the frames", flush=True)
@@ -108,7 +118,23 @@ def main():
     subprocess.run(py + ["pose", a.id, "idle_0", str(base_path)], check=True)
     for name in todo:
         subprocess.run(py + ["pose", a.id, name, str(POSES / f"{a.id}_{name}.png")], check=True)
-    print("frames keyed; now: sprites.py atlas")
+    print("frames keyed")
+    cutin(a)
+
+
+def cutin(a):
+    """The special-move portrait needs the keyed special pose, so it runs after the frames."""
+    subprocess.run([sys.executable, str(ROOT / "tools" / "cutin.py"), a.id, "--seed", str(a.seed), "--look", a.look], check=True)
+    print("cut-in drawn")
+    voice(a)
+
+
+def voice(a):
+    if not (a.shout and a.voice):
+        sys.exit("new_fighter: the shout needs --shout \"Toma!\" and --voice female|male|deep|pt (female for a woman)")
+    subprocess.run([sys.executable, str(ROOT / "tools" / "voice.py"), a.id, "--text", a.shout, "--voice", a.voice,
+                    "--pitch", str(a.pitch)], check=True)
+    print("shout made; now: sprites.py atlas")
 
 
 if __name__ == "__main__":

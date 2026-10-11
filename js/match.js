@@ -69,6 +69,7 @@ function startSuper(f, m) {
     m.events.push({ type: "super", who: f.side });
   } else {
     setState(f, "special");
+    m.events.push({ type: "special", who: f.side });
   }
   f.vx = 0;
 }

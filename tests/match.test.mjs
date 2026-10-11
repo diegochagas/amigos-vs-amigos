@@ -219,3 +219,15 @@ test("a special that was mid-cast when time ran out does not fire", () => {
   assert.ok(!ev.some((e) => e.type === "fire"));
   assert.deepEqual(m.projectiles, []);
 });
+
+test("a special announces itself once so the cut-in can show; a hyper announces a super instead", () => {
+  const m = ready();
+  let ev = run(m, 1, inp({ a: true, b: true }));
+  ev.push(...run(m, 40));
+  assert.equal(ev.filter((e) => e.type === "special").length, 1);
+  assert.ok(!ev.some((e) => e.type === "super"));
+  m.fighters[0].meter = MAX_METER;
+  ev = run(m, 1, inp({ a: true, b: true }));
+  assert.ok(ev.some((e) => e.type === "super"));
+  assert.ok(!ev.some((e) => e.type === "special"));
+});
