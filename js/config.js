@@ -20,7 +20,7 @@ export const BODY_GAP = 74;         // fighters can't stand closer than this
 export const MAX_SPREAD = VIEW_W - 150;
 
 export const INTRO_FRAMES = 130;
-export const HYPER_FREEZE = 120;    // the whole match pauses on the cut-in for 2 s before the beam
+export const HYPER_FREEZE = 120;    // the whole match pauses on the cut-in for 2 s, then the beam fires at once
 export const KO_FRAMES = 190;
 export const WIN_FRAMES = 170;
 
@@ -30,7 +30,7 @@ export const MOVES = {
   kick: { startup: 7, active: 5, recovery: 15, dmg: 10, box: [20, 182, -215, -105], hitstun: 19, blockstun: 12, push: 8, gain: 11 },
   air: { startup: 3, active: 60, recovery: 0, dmg: 9, box: [0, 170, -200, -30], hitstun: 17, blockstun: 10, push: 6, gain: 9 },
   special: { startup: 13, active: 0, recovery: 24, dmg: 12, chip: 2, hitstun: 18, blockstun: 12, push: 7, gain: 6 },
-  hyper: { startup: 26, active: 42, recovery: 26, dmg: 5, chip: 1, every: 6, box: [50, 760, -235, -95], hitstun: 14, blockstun: 10, push: 4, gain: 0 },
+  hyper: { startup: 2, active: 42, recovery: 26, dmg: 5, chip: 1, every: 6, box: [50, 760, -235, -95], hitstun: 14, blockstun: 10, push: 4, gain: 0 },
 };
 export const PROJECTILE = { speed: 9.5, y: -170, r: 24 };
 

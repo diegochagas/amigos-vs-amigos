@@ -174,7 +174,7 @@ export function createRenderer(canvas, assets) {
 
   // MvC-style cut-in: when a hyper (A+B at MAX) starts, the attacker's cartoon portrait
   // slides in from their side of the screen in a slanted panel while the match is frozen
-  // for HYPER_FREEZE frames (2 s), then slides out as the beam comes.
+  // for HYPER_FREEZE frames (2 s); it has left the screen when the beam starts.
   // One slot per fighter, so two hypers at once show both portraits.
   const cutin = [null, null];
   const CUT_W = 410, CUT_SLANT = 70;
@@ -365,7 +365,7 @@ export function createRenderer(canvas, assets) {
           fx.push({ kind: "hit", x: e.x, y: e.y, t: 0, life: e.heavy ? 16 : 11, heavy: e.heavy, rot: tick });
           shake = e.heavy ? 9 : 5;
         } else if (e.type === "block") fx.push({ kind: "block", x: e.x, y: e.y, t: 0, life: 12 });
-        else if (e.type === "super") cutin[e.who] = { t: 0, life: HYPER_FREEZE + 8 };
+        else if (e.type === "super") cutin[e.who] = { t: 0, life: HYPER_FREEZE };
         else if (e.type === "ko" || e.type === "thud") shake = 14;
       }
     },
@@ -396,13 +396,13 @@ export function createRenderer(canvas, assets) {
         }
         ctx.restore();
       }
+      drawCutins(m);                       // behind the fighters, in front of the stage
       const order = a.state === "hit" || a.state === "ko" || a.state === "block" ? [a, b] : [b, a];
       for (const f of order) drawFighter(f, { shadow: labels.shadow && f === b });
       for (const f of m.fighters) if (f.state === "hyper") drawBeam(f);
       for (const p of m.projectiles) drawProjectile(p, m.fighters[p.owner].id);
       drawFx();
       ctx.restore();
-      drawCutins(m);
       drawHud(m, labels);
     },
   };
