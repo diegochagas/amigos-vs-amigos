@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://amigos.diegochagas.com/sitemap.xml
